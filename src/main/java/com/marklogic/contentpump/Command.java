@@ -60,6 +60,7 @@ public enum Command implements ConfigConstants {
     IMPORT {        
         @Override
         public void configOptions(Options options) {
+            configAwsOptions(options);
             configCommonOptions(options);
             configConnectionId(options);
             configCopyOptions(options);
@@ -67,8 +68,8 @@ public enum Command implements ConfigConstants {
             configBatchTxn(options);
             configModule(options);
             configRDFGraphOutputOptions(options);
-            
-			Option inputFilePath = OptionBuilder
+
+            Option inputFilePath = OptionBuilder
                 .withArgName("string")
                 .hasArg()
                 .withDescription("The file system location for input, as a "
@@ -441,6 +442,7 @@ public enum Command implements ConfigConstants {
         
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+            applyAwsConfigOptions(conf, cmdline);
             applyCopyConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
             applyRDFGraphOutputConfigOptions(conf, cmdline);
@@ -891,6 +893,7 @@ public enum Command implements ConfigConstants {
     EXPORT {
         @Override
         public void configOptions(Options options) {
+            configAwsOptions(options);
             configCommonOptions(options);
             configConnectionId(options);
             configCopyOptions(options);
@@ -1004,6 +1007,7 @@ public enum Command implements ConfigConstants {
 
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+            applyAwsConfigOptions(conf, cmdline);
             applyCopyConfigOptions(conf, cmdline);
             applyFilteringConfigOptions(conf, cmdline);
             applyRedactionConfigOptions(conf, cmdline);
@@ -1634,7 +1638,8 @@ public enum Command implements ConfigConstants {
     },
     EXTRACT {
         @Override
-        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {  
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+            applyAwsConfigOptions(conf, cmdline);
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 String wkdir = conf.get(CONF_MAPREDUCE_JOB_WORKING_DIR);
@@ -1669,7 +1674,8 @@ public enum Command implements ConfigConstants {
 
         @Override
         public void configOptions(Options options) {
-            configCommonOptions(options); 
+            configAwsOptions(options);
+            configCommonOptions(options);
             Option inputFilePath = OptionBuilder
                 .withArgName("string")
                 .hasArg()
@@ -1883,6 +1889,20 @@ public enum Command implements ConfigConstants {
     	options.addOption(redaction);
     }
     
+    static void configAwsOptions(Options options) {
+        Option awsAccessKeyId = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription("The AWS access key")
+                .create(AWS_ACCESS_KEY_ID);
+        options.addOption(awsAccessKeyId);
+        Option awsSecretAccessKey = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription("The AWS secret access key")
+                .create(AWS_SECRET_ACCESS_KEY);
+        options.addOption(awsSecretAccessKey);
+    }
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
             .withArgName("string")
@@ -2227,6 +2247,17 @@ public enum Command implements ConfigConstants {
         }
     }
 
+    static void applyAwsConfigOptions(Configuration conf, CommandLine cmdline) {
+        if (cmdline.hasOption(AWS_ACCESS_KEY_ID)) {
+            String val = cmdline.getOptionValue(AWS_ACCESS_KEY_ID);
+            conf.set(CONF_AWS_S3A_ACCESS_KEY_ID, val);
+        }
+        if (cmdline.hasOption(AWS_SECRET_ACCESS_KEY)) {
+            String val = cmdline.getOptionValue(AWS_SECRET_ACCESS_KEY);
+            conf.set(CONF_AWS_S3A_SECRET_ACCESS_KEY, val);
+        }
+    }
+
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
         if (cmdline.hasOption(COPY_COLLECTIONS)) {
             String arg = cmdline.getOptionValue(COPY_COLLECTIONS);
@@ -2240,7 +2271,7 @@ public enum Command implements ConfigConstants {
                                 + ": " + arg);
             }
         } else {
-            conf.set(MarkLogicConstants.COPY_COLLECTIONS, 
+            conf.set(MarkLogicConstants.COPY_COLLECTIONS,
                     DEFAULT_COPY_COLLECTIONS);
         }
         if (cmdline.hasOption(COPY_PERMISSIONS)) {

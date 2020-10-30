@@ -39,6 +39,8 @@ public interface ConfigConstants {
     static final String OPTIONS_FILE = "-options_file";
 
     // command-specific
+    static final String AWS_ACCESS_KEY_ID = "aws_access_key_id";
+    static final String AWS_SECRET_ACCESS_KEY = "aws_secret_access_key";
     static final String INPUT_FILE_PATH = "input_file_path";
     static final String INPUT_FILE_PATTERN = "input_file_pattern";
     static final String AGGREGATE_RECORD_ELEMENT = "aggregate_record_element";
@@ -160,6 +162,9 @@ public interface ConfigConstants {
     static final String DATA_TYPE = "data_type";
     
     // configurations to be overwritten in hadoop conf
+    static final String CONF_AWS_S3A_ACCESS_KEY_ID = "fs.s3a.access.key";
+    static final String CONF_AWS_S3A_SECRET_ACCESS_KEY = "fs.s3a.secret.key";
+
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
     // for Hadoop1
